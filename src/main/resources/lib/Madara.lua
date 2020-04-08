@@ -188,7 +188,7 @@ return function(baseURL, _self)
 		}),
 		FilterGroup("Genres", map(_self.genres, function(v, k) -- 6
             genre = genre + 1
-			genre_map[genre] = v:getName():lower():match("(%a+)")
+			genre_map[genre] = k
 			return CheckboxFilter(v)
 		end))
 	}
