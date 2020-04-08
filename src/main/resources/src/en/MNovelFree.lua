@@ -1,3 +1,5 @@
+-- {"id":249,"version":"1.0.0","author":"Doomsdayrs","repo":""}
+
 return Require("NovelFull")("https://mnovelfree.com", {
 	id = 249,
 	name = "MNovelFree",
