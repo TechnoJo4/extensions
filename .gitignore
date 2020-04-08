@@ -6,3 +6,6 @@ target/*
 personal
 .gradle
 out/*
+
+*.*-project
+*.*-workspace
