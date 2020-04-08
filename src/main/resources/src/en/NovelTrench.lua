@@ -64,15 +64,7 @@ return Require("Madara")("https://noveltrench.com", {
 		["canceled"] = "Canceled",
 		["on-hold"] = "On Hold",
 	},
-	---@param _table table
-	appendToSearchFilters = function(_table)
-		table.insert(_table,7,
-				DropdownFilter("Genres Condition", { "OR (having one of selected genres)", "AND (having all selected genres" }))
-		return _table
-	end,
-	appendToSearchURL = function(url, table)
-		return url .. "&op=" .. table[7]
-	end,
+	hasGenreOp = true,
 	latestNovelSel = "div.col-12.col-md-4.badge-pos-1",
 	novelPageTitleSel = "h1",
 	novelListingURLPath = "manga"

@@ -2,9 +2,8 @@
 
 local urlencode = Require("url").encode
 
-local text = function(v)
-	return v:text()
-end
+local dnop = function(self, v) return v end
+local text = function(v) return v:text() end
 
 local genre_map = {}
 local settings = {}
@@ -16,7 +15,8 @@ local defaults = {
 	novelPageTitleSel = "h3",
 
 	hasCloudFlare = false,
-	hasSearch = true
+	hasSearch = true,
+	hasGenreOp = false
 }
 
 ---@param page int @increment
@@ -74,22 +74,17 @@ function defaults:createSearchString(data)
 			end
 		end
 	end
-	url = self.appendToSearchURL(url, data)
-	return url
+
+	if self.hasGenreOp then
+		-- OR -> "op=" (blank) ; AND -> "op=1"
+		url = url .. "&op=" .. (data[7] == 2 and "1" or "")
+	end
+
+	return self.appendToSearchURL(url, data)
 end
 
----@param string string
----@param data table
----@return string
-function defaults:appendToSearchURL(str, data)
-	return str
-end
-
----@param table table
----@return table
-function defaults:appendToSearchFilters(table)
-	return table
-end
+defaults.appendToSearchURL = dnop
+defaults.appendToSearchFilters = dnop
 
 function defaults:search(data)
 	local url = self.createSearchString(data)
@@ -192,6 +187,10 @@ return function(baseURL, _self)
 			return CheckboxFilter(v)
 		end))
 	}
+	if _self.hasGenreOp then
+		filters[7] = DropdownFilter("Genre Operation", { "OR (One or more)", "AND (All)" })
+	end
+
 	filters = _self.appendToSearchFilters(filters)
 	_self["searchFilters"] = filters
 	_self["baseURL"] = baseURL

@@ -36,8 +36,6 @@ return Require("Madara")("https://readnovelforlife.com", {
         ["xuanhuan"] = "Xuanhuan",
         ["yaoi"] = "Yaoi"
     },
+    hasGenreOp = true,
 	hasSearch = false,
-	appendToSearchFilters = function()
-		return {}
-	end,
 })
