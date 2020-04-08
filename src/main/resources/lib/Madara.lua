@@ -1,12 +1,12 @@
 -- {"version":"1.2.0","author":"TechnoJo4","dep":["url"]}
 
-local encode = Require("url").encode
+local urlencode = Require("url").encode
 
 local text = function(v)
 	return v:text()
 end
 
-local genres_map = {}
+local genre_map = {}
 local settings = {}
 
 local defaults = {
@@ -19,31 +19,26 @@ local defaults = {
 	hasSearch = true
 }
 
-function defaults:encode(string)
-	return encode(string)
-end
-
 ---@param page int @increment
 function defaults:latest(data, page)
 	return self.parse(GETDocument(self.baseURL .. "/" .. self.novelListingURLPath .. "/page/" .. page .. "/?m_orderby=latest"))
 end
 
---- @param table table
-------@return string
-function defaults:createSearchString(table)
-	local query = table[QUERY]
-	local orderBy = table[1]
-	local author = table[2]
-	local artist = table[3]
-	local release = table[4]
-	local stati = table[5]
+---@param data table
+---@return string
+function defaults:createSearchString(data)
+	local query = data[QUERY]
+	local orderBy = data[1]
+	local author = data[2]
+	local artist = data[3]
+	local release = data[4]
 
-	local url = self.baseURL .. "/?s=" .. encode(query) .. "&post_type=wp-manga" ..
-			"&author=" .. encode(author) ..
-			"&artist=" .. encode(artist) ..
-			"&release=" .. encode(release)
+	local url = self.baseURL .. "/?s=" .. urlencode(query) .. "&post_type=wp-manga" ..
+			"&author=" .. urlencode(author) ..
+			"&artist=" .. urlencode(artist) ..
+			"&release=" .. urlencode(release)
 
-	if orderBy ~= nil then
+	if orderBy then
 		url = url .. "&m_orderby=" .. ({
 			[0] = "relevance",
 			[1] = "latest",
@@ -54,7 +49,9 @@ function defaults:createSearchString(table)
 			[6] = "new-manga"
 		})[orderBy]
 	end
-	if stati ~= nil then
+
+    local stati = data[5]
+	if stati then
 		if stati[0] then
 			url = url .. "&status[]=end"
 		end
@@ -69,23 +66,23 @@ function defaults:createSearchString(table)
 		end
 	end
 
-	local genres = table[6]
-	if genres ~= nil then
-		for i = 0, rawlen(genres_map) do
+	local genres = data[6]
+	if genres then
+		for i,v in pairs(genre_map) do
 			if genres[i] then
-				url = url .. "&genre[]=" .. genres_map[i]
+				url = url .. "&genre[]=" .. genre_map[i]
 			end
 		end
 	end
-	url = self.appendToSearchURL(url, table)
+	url = self.appendToSearchURL(url, data)
 	return url
 end
 
 ---@param string string
----@param table table
+---@param data table
 ---@return string
-function defaults:appendToSearchURL(string, table)
-	return string
+function defaults:appendToSearchURL(str, data)
+	return str
 end
 
 ---@param table table
@@ -177,9 +174,9 @@ return function(baseURL, _self)
 		local d = defaults[k]
 		return (type(d) == "function" and wrap(_self, d) or d)
 	end })
-	local keyID = 0;
+	local genre = 0;
 	local filters = {
-		DropdownFilter("Order by", { "Relevance", "Latest", "A-Z", "Rating", "Trending", "Most Views", "New" }), -- 1`
+		DropdownFilter("Order by", {"Relevance", "Latest", "A-Z", "Rating", "Trending", "Most Views", "New"}), -- 1
 		TextFilter("Author"), -- 2
 		TextFilter("Artist"), -- 3
 		TextFilter("Year of Release"), -- 4
@@ -189,11 +186,11 @@ return function(baseURL, _self)
 			CheckboxFilter("Canceled"), -- 3
 			CheckboxFilter("On Hold") -- 4
 		}),
-		FilterGroup("Genres", map(_self.genres, function(v, k)
-			genres_map[keyID] = v:getName():lower():match("(%a+)")
-			k = k + 1
+		FilterGroup("Genres", map(_self.genres, function(v, k) -- 6
+            genre = genre + 1
+			genre_map[genre] = v:getName():lower():match("(%a+)")
 			return CheckboxFilter(v)
-		end)) -- 6
+		end))
 	}
 	filters = _self.appendToSearchFilters(filters)
 	_self["searchFilters"] = filters

@@ -82,12 +82,12 @@ return {
 	imageURL = baseURL .. "/wp-content/themes/mtlnovel/images/logo32.png",
 	hasSearch = false,
 	listings = {
-		Listing("Novel List", filters,true, function(data, page)
+		Listing("Novel List", filters, true, function(data, page)
 			local d = GETDocument(baseURL .. "/novel-list/" ..
 					"?orderby=" .. ({ [0] = "date", [1] = "name", [2] = "rating", [3] = "view" })[data[1]] ..
 					"&order=" .. ({ [0] = "desc", [1] = "asc" })[data[2]] ..
 					"&status=" .. ({ [0] = "all", [1] = "completed", [2] = "ongoing" })[data[3]] ..
-					"&pg=" .. page)
+					"&pg=" .. tostring(page or 1))
 			return map(d:select("div.box.wide"), function(v)
 				local lis = Novel()
 				lis:setImageURL(v:selectFirst("amp-img.list-img"):selectFirst("amp-img.list-img"):attr("src"))
@@ -100,10 +100,7 @@ return {
 	},
 	getPassage = getPassage,
 	parseNovel = parseNovel,
-	search = function()
-	end,
+	search = function() end,
 	settings = { DropdownFilter("Language", { "English", "Chinese" }) },
-	updateSetting = function(id, value)
-		settings[id] = value
-	end
+	updateSetting = function(id, value) settings[id] = value end
 }
