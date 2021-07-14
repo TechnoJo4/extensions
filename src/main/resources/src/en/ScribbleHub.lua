@@ -84,23 +84,14 @@ return {
     expandURL = expandURL,
 
     parseNovel = function(url, loadChapters)
-        Log("ScribbleHub", ("url %s"):format(url))
         local doc = GETDoc(baseURL.."/series/"..url.."/a/")
-        Log("ScribbleHub", ("doc %s"):format(tostring(doc)))
         local wrap = doc:selectFirst(".wi_fic_wrap")
-        Log("ScribbleHub", ("wrap %s"):format(tostring(wrap)))
         local novel = wrap:selectFirst(".novel-container")
-        Log("ScribbleHub", ("novel %s"):format(tostring(novel)))
         local r = wrap:selectFirst(".wi-fic_r-content")
-        Log("ScribbleHub", ("r %s"):format(tostring(r)))
         local s = r:selectFirst(".copyright ul"):children()
-        Log("ScribbleHub", ("s %s"):format(tostring(s)))
         s = s:get(s:size() - 1):children()
-        Log("ScribbleHub", ("s %s"):format(tostring(s)))
         s = s:get(s:size() - 1)
-        Log("ScribbleHub", ("s %s"):format(tostring(s)))
         s = s:ownText()
-        Log("ScribbleHub", ("s %s"):format(tostring(s)))
         if s:match("Ongoing") then
             s = NovelStatus.PUBLISHING
         elseif s:match("Complete") then
@@ -108,7 +99,6 @@ return {
         else
             s = NovelStatus.UNKNOWN
         end
-        Log("ScribbleHub", ("s %s"):format(tostring(s)))
 
         local text = function(v) return v:text() end
         local info = NovelInfo {
@@ -121,12 +111,9 @@ return {
             status = s
         }
 
-        Log("ScribbleHub", ("info %s"):format(tostring(info)))
         if loadChapters then
             local body = RequestBody("action=wi_getreleases_pagination&pagenum=-1&mypostid="..url, MTYPE)
-            Log("ScribbleHub", ("body %s"):format(tostring(body)))
             local cdoc = RequestDocument(POST("https://www.scribblehub.com/wp-admin/admin-ajax.php", HEADERS, body))
-            Log("ScribbleHub", ("cdoc %s"):format(tostring(cdoc)))
             local chapters = AsList(map(cdoc:selectFirst("ol"):select("li"), function(v, i)
                 local a = v:selectFirst("a")
                 return NovelChapter {
@@ -135,7 +122,6 @@ return {
                     link = shrinkURL(a:attr("href"))
                 }
             end))
-            Log("ScribbleHub", ("chapters %s"):format(tostring(chapters)))
             Reverse(chapters)
             info:setChapters(chapters)
         end
